@@ -1,4 +1,5 @@
 from typing import *
+import os
 import torch
 import torch.nn.functional as F
 from torchvision import transforms
@@ -62,7 +63,8 @@ class DinoV3FeatureExtractor:
     """
     def __init__(self, model_name: str, image_size=512):
         self.model_name = model_name
-        self.model = DINOv3ViTModel.from_pretrained(model_name)
+        model_path = os.environ.get("TRELLIS_DINOV3_PATH", model_name)
+        self.model = DINOv3ViTModel.from_pretrained(model_path)
         self.model.eval()
         self.image_size = image_size
         self.transform = transforms.Compose([
@@ -83,7 +85,8 @@ class DinoV3FeatureExtractor:
         hidden_states = self.model.embeddings(image, bool_masked_pos=None)
         position_embeddings = self.model.rope_embeddings(image)
 
-        for i, layer_module in enumerate(self.model.layer):
+        layers = self.model.layer if hasattr(self.model, "layer") else self.model.model.layer
+        for layer_module in layers:
             hidden_states = layer_module(
                 hidden_states,
                 position_embeddings=position_embeddings,
