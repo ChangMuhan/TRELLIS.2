@@ -43,11 +43,14 @@ pipeline = Trellis2ImageTo3DPipeline.from_pretrained("microsoft/TRELLIS.2-4B")
 pipeline.cuda()
 
 # 3. Load Image & Run
-image = Image.open("./assets/example_image/0a34fae7ba57cb8870df5325b9c30ea474def1b0913c19c596655b85a79fdee4.webp")
+# image = Image.open("./assets/example_image/0a34fae7ba57cb8870df5325b9c30ea474def1b0913c19c596655b85a79fdee4.webp")
+image = Image.open("/home/fun/3Dsystem/services/generation/text2image-api/generated_b8acea3d08c8478884cf0a4e0d9cbc3f.jpg")
 pipeline_type = os.environ.get('TRELLIS_PIPELINE_TYPE', '512')
+seed = int(os.environ.get('TRELLIS_SEED', '1'))
 print('pipeline_type:', pipeline_type)
+print('seed:', seed)
 print('FLEX_GEMM_ALGO:', os.environ.get('FLEX_GEMM_ALGO'))
-mesh = pipeline.run(image, pipeline_type=pipeline_type)[0]
+mesh = pipeline.run(image, pipeline_type=pipeline_type, seed=seed)[0]
 mesh.simplify(16777216) # nvdiffrast limit
 
 # 4. Render Video
